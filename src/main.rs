@@ -1,11 +1,11 @@
-use druid::{widget::Label, AppLauncher, Data, Widget, WindowDesc, Env, Lens,PlatformError};
-use druid::widget::{Button, Flex};
+use druid::{AppLauncher, Data, Widget, WindowDesc, Env, Lens,PlatformError};
+use druid::widget::{Label,Button, Flex};
 
-use pdfmerger_derived_lenses::file_number;
 use rfd:: FileDialog;
 
 use std::path::PathBuf;
 use std::vec::Vec;
+use std::sync::Arc;
 
 fn main()->Result<(),PlatformError>{
     let main_window = WindowDesc::new(build_app())
@@ -16,6 +16,7 @@ fn main()->Result<(),PlatformError>{
         pdf_name: "Pdf_name".into(),
         file_selction_state: "0 files selected".into(),
         file_number: 0,
+        pdf_list: Arc::new(Vec::new()),
     };
 
     AppLauncher::with_window(main_window)
@@ -29,31 +30,32 @@ struct PDFmerger{
     pdf_name: String,
     file_selction_state: String,
     file_number: i32,
+    pdf_list: Arc<Vec<PathBuf>>,
 }
 
 fn build_app()-> impl Widget<PDFmerger>{
-    let mut pdfs_list:Vec<PathBuf>;
-    
     
     let mut col = Flex::column();
     col.add_child(Label::new(|data: &PDFmerger, _env: &Env| format!("Hello {}!", data.pdf_name)));
-    col.add_child(Button::new("Select files!").on_click(|_ctx,wiget_info:  &mut PDFmerger, _env|{
+    col.add_child(Button::new("Select files!").on_click(|_ctx, data: &mut PDFmerger, _env|{
         let files = file_explorer();
         match files {
             Some(files) => {
                 let files_selected = files.len();
-                wiget_info.file_number += files_selected as i32;
 
-                println!("Number of files selected {files_selected}")
-                if pdfs_list.len() == 0 {
-                    pdfs_list = files
+                println!("Number of files selected {files_selected}");
+                if data.pdf_list.len() == 0 {
+                    println!("5");
                 }
                 else{
-                    pdfs_list.append(&mut files);
+                    let mut files_refarence = &files;
+                    for paths in files{
+                        println!("5");
+                    }
                 }
             }
             None =>{
-                println!("Failed to select a file")
+                println!("Failed to select a file");
             }
 
         }
