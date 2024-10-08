@@ -5,7 +5,7 @@ use rfd:: FileDialog;
 
 use std::path::PathBuf;
 use std::vec::Vec;
-use std::sync::Arc;
+use std::sync::{Arc,Mutex};
 
 fn main()->Result<(),PlatformError>{
     let main_window = WindowDesc::new(build_app())
@@ -16,7 +16,7 @@ fn main()->Result<(),PlatformError>{
         pdf_name: "Pdf_name".into(),
         file_selction_state: "0 files selected".into(),
         file_number: 0,
-        pdf_list: Arc::new(Vec::new()),
+        pdf_list: Arc::new(Mutex::new(Vec::new())),
     };
 
     AppLauncher::with_window(main_window)
@@ -30,7 +30,7 @@ struct PDFmerger{
     pdf_name: String,
     file_selction_state: String,
     file_number: i32,
-    pdf_list: Arc<Vec<PathBuf>>,
+    pdf_list: Arc<Mutex<Vec<PathBuf>>>,
 }
 
 fn build_app()-> impl Widget<PDFmerger>{
@@ -44,15 +44,9 @@ fn build_app()-> impl Widget<PDFmerger>{
                 let files_selected = files.len();
 
                 println!("Number of files selected {files_selected}");
-                if data.pdf_list.len() == 0 {
-                    println!("5");
-                }
-                else{
-                    let mut files_refarence = &files;
-                    for paths in files{
-                        println!("5");
-                    }
-                }
+                let mut pdfs = data.pdf_list.lock().unwrap(); //Surely nothing wrong can happen here
+                pdfs.extend(files);
+                println!("{:?}",pdfs);
             }
             None =>{
                 println!("Failed to select a file");
